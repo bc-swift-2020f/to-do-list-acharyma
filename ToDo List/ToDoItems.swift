@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UserNotifications
 
 class ToDoItems{
     var itemsArray: [ToDoItem] = []
@@ -22,7 +23,9 @@ class ToDoItems{
         catch{
             print("ERROR!")
         }
+        setNotifications()
     }
+    
     func loadData(completed: @escaping ()->()){
         let directoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let documentURL = directoryURL.appendingPathComponent("todos").appendingPathExtension("json")
@@ -37,6 +40,20 @@ class ToDoItems{
             print("error, couldn't load data")
         }
         completed()
+    }
+    
+    func setNotifications(){
+        guard itemsArray.count > 0 else{
+            return
+        }
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+
+        for index in 0..<itemsArray.count {
+            if itemsArray[index].reminderSet {
+                let toDoItem = itemsArray[index]
+                itemsArray[index].notificationID = LocalNotificationManager.setCalenderNotification(title: toDoItem.name, subtitle: "", body: toDoItem.notes, badgeNumber: nil, sound: .default, date: toDoItem.date)
+            }
+        }
     }
     
 }
