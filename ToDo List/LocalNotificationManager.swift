@@ -5,11 +5,11 @@
 //  Created by Manogya Acharya on 10/3/20.
 //
 
-import Foundation
 import UserNotifications
+import UIKit
 
 struct LocalNotificationManager{
-    static func authorizeLocalNotifications(){
+    static func authorizeLocalNotifications(viewController: UIViewController){
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert,.sound,.badge]) { (granted, error) in
             guard error == nil else{
                 print("ERROR! \(error!.localizedDescription)")
@@ -20,7 +20,27 @@ struct LocalNotificationManager{
             }
             else{
                 print("DENIED")
-                //TODO: Put an alert telling user what to do
+                DispatchQueue.main.async {
+                    viewController.oneButtonAlert(title: "User Has Not Allowed Notifications", message: "To reveice alrets for reminders, open Settings app, select To Do List > Notifications > Allow Notifications")
+                }
+            }
+        }
+    }
+    
+    static func isAuthorized(completed: @escaping (Bool)->()){
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert,.sound,.badge]) { (granted, error) in
+            guard error == nil else{
+                print("ERROR! \(error!.localizedDescription)")
+                completed(false)
+                return
+            }
+            if granted{
+                print("CHECK")
+                completed(true)
+            }
+            else{
+                print("DENIED")
+                completed(false)
             }
         }
     }
